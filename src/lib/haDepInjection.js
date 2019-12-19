@@ -15,6 +15,10 @@ try {
 }
 
 // Register Services 
+serviceLocator.register('config', () => {
+    return config;
+});
+
 serviceLocator.register('jmsClient', () => {
     const jmsClient = require('../jms/haJMSClient');
     return new jmsClient(config);

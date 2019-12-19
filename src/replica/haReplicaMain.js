@@ -5,17 +5,19 @@ let jms, config, logger, esClient, documentsBulk, registerTimeOutFn;
 const scriptName = 'haReplicaMain';
 
 const sendToElastic = () => {
-    if(registerTimeOutFn) {
+    if (registerTimeOutFn) {
         clearTimeout(registerTimeOutFn);
     }
-    const bulkInputString = JSON.stringify(documentsBulk);
+    // This does a deep copy:
+    //const bulkInputString = JSON.stringify(documentsBulk);
     logger.info(`${scriptName}: Documents Sent: ${documentsBulk.total}`);
-    esClient.bulk(JSON.parse(bulkInputString), (error, response) => {
-        if(error) {
-            logger.error(`${scriptName}: bulkLoad ERROR #1: ${bulkInputString}, Due to: ${JSON.stringify(error)}`);
+    // Field _type is no longer being sent to ES so this version of the code works with ES > 7
+    esClient.bulk(documentsBulk, (error, response) => {
+        if (error) {
+            logger.error(`${scriptName}: bulkLoad ERROR #1: ${JSON.stringify(documentsBulk)}, Due to: ${JSON.stringify(error)}`);
         } else {
             if (response.errors) {
-                logger.error(`${scriptName}: bulkLoad ERROR #2: ${bulkInputString}, Due to: ${JSON.stringify(response.errors)}`);
+                logger.error(`${scriptName}: bulkLoad ERROR #2: ${JSON.stringify(documentsBulk)}, Due to: ${JSON.stringify(response.errors)}`);
             } else {
                 logger.info(`${scriptName}: Indexed ${response.items.length} documents from total ${documentsBulk.total}`);
             }
@@ -54,16 +56,19 @@ const subscribe = () => {
                     }
                     if (config.replica.bulk > 0 && messageBody.action) {
                         let header;
+                        message.ack();
                         switch (messageBody.action) {
                             case 'index':
                             case 'update':
                                 header = {
                                     index: {
                                         _index: (config.replica.environment || '') + messageBody.index,
-                                        _type: messageBody.type,
                                         _id: messageBody.id
                                     }
                                 };
+                                if (messageBody.parent) {
+                                    header.index._parent = messageBody.parent;
+                                  }
                                 // Each index action should have 2 entries in documentsBulk: Header and body 
                                 documentsBulk.body.push(header);
                                 documentsBulk.body.push(messageBody.body);
@@ -73,7 +78,6 @@ const subscribe = () => {
                                 header = {
                                     delete: {
                                         _index: (config.replica.environment || '') + messageBody.index,
-                                        _type: messageBody.type,
                                         _id: messageBody.id
                                     }
                                 };
@@ -81,6 +85,9 @@ const subscribe = () => {
                                 documentsBulk.body.push(header);
                                 documentsBulk.total++;
                                 break;
+                            default:
+                                logger.error(`${scriptName}: Invalid action specifed: ${messageBody.action} - could not load ${JSON.stringify(messageBody.body)}`);
+                                return;
                         }
                         // client.bulk({body: Object: The operation definition and data (action-data pairs), separated by newlines})
                         if (documentsBulk.total >= config.replica.bulk) {
@@ -90,7 +97,6 @@ const subscribe = () => {
                     }
                 }
             });
-            //console.log(message);
         }
     });
 }
@@ -106,7 +112,11 @@ module.exports = (_jms, _config, _logger) => {
     logger.info(`${scriptName}: config.replica.bulk=${config.replica.bulk || ''}`);
     logger.info(`${scriptName}: config.replica.timer=${config.replica.timer || ''}`);
     logger.info(`${scriptName}: config.replica.elasticQueue=${config.replica.elasticQueue || ''}`);
-    //logger.info(`${scriptName}: config.elasticsearch.user=${config.elasticSearch.user || ''}`);
+    // We are assuming config.elasticsearch has been set-up
+    logger.info(`${scriptName}: config.elasticsearch.user=${config.elasticSearch.user || ''}`);
+    logger.info(`${scriptName}: config.elasticsearch.password=${config.elasticSearch.password ? config.elasticSearch.password.replace(/./g, '*') : ''}`);
+    logger.info(`${scriptName}: config.elasticsearch.url=${config.elasticSearch.url || ''}`);
+    logger.info(`${scriptName}: config.elasticsearch.apiVersion=${config.elasticSearch.apiVersion || ''}`);
 
     if (!config.replica.elasticQueue) {
         throw new Error('Please set up replica.elasticQueue in the config ha-replica.config.json');

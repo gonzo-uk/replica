@@ -1,2 +1,11 @@
+'use strict';
+const scriptName = 'index';
 const haDepInjection = require('./lib/haDepInjection');
-const elasticReplica = require();
+const elasticReplica = require('./replica/haReplicaMain');
+let jms, config, logger;
+config = haDepInjection.getDependency('config');
+logger = haDepInjection.getDependency('logger');
+jms = haDepInjection.getDependency('jmsClient');
+const { subscribe } = elasticReplica(jms, config, logger);
+subscribe();
+logger.info(`${scriptName}: replication process initialised`);
