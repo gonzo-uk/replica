@@ -1,6 +1,6 @@
 "use strict";
 const stompit = require('stompit');
-const serviceLoc = require('../lib/haServiceLocator');
+const serviceLoc = require('../services/haServiceLocator');
 const logger = serviceLoc.getDependency('logger');
 const scriptName = 'haJMSClient';
 

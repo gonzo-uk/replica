@@ -1,7 +1,7 @@
 "use strict";
 const fs = require('fs');
 const path = require('path');
-const serviceLocator = require('./haServiceLocator');
+const serviceLocator = require('../services/haServiceLocator');
 
 let configFileLoc, config;
 try {

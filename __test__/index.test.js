@@ -1,7 +1,7 @@
 'use strict';
 const mockSubscribe = {
     subscribe: jest.fn().mockImplementation(() => {
-        console.log('running subscribe');
+        //console.log('running subscribe');
     })
 }
 const mockReplica = jest.fn().mockImplementation(() => {
@@ -18,7 +18,7 @@ const logger = {
 
 const mockDepInjection = {
     getDependency: jest.fn().mockImplementation(service => {
-        console.log(service);
+        //console.log(service);
         switch(service) {
             case 'logger':
                 return logger;
@@ -38,14 +38,14 @@ beforeEach(() => {
 });
 
 describe('Suit to test index.js for Replica into ElastiSearch Module', () => {
-    it('Load up Index and initialise haReplicaMain', () => {
+    it('Should load up Index and initialise haReplicaMain', () => {
         const haReplicaMain = require('../src/index');
         expect(mockReplica).toHaveBeenCalledTimes(1);
         expect(typeof mockReplica.mock.calls[0][0]).toBe('object');
         expect(typeof mockReplica.mock.calls[0][1]).toBe('object');
         expect(typeof mockReplica.mock.calls[0][2]).toBe('object');
     });
-    it('Initialise subscription', () => {
+    it('Should initialise subscribe() method', () => {
         const haReplicaMain = require('../src/index');
         expect(mockSubscribe.subscribe).toHaveBeenCalled();
     });

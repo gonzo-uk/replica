@@ -37,7 +37,7 @@ beforeEach(() => {
     jest.clearAllTimers();
 });
 
-describe.skip('Suit to test haReplicaMain.js for Replica into ElastiSearch Module', () => {
+describe('Suit to test haReplicaMain.js for Replica into ElastiSearch Module', () => {
     it('Initiliase the module: No config or logger have been passed in', () => {
         // const replication = require('../src/replica/haReplicaMain');
         expect(() => replication()).toThrowError();
