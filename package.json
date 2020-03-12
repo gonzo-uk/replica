@@ -1,0 +1,23 @@
+{
+  "name": "replication",
+  "version": "1.0.0",
+  "description": "replication process into ElasticSearch",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon ./src/index.js",
+    "test": "jest",
+    "test-coverage": "jest --coverage"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^24.0.23",
+    "jest": "^24.9.0",
+    "nodemon": "^2.0.2"
+  },
+  "dependencies": {
+    "elasticsearch": "^16.5.0",
+    "stompit": "^0.26.0",
+    "winston": "^3.2.1"
+  }
+}

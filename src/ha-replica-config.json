@@ -1,0 +1,32 @@
+{
+  "jms": {
+    "host": "rhbilling01",
+    "port": 61613,
+    "user": "admin",
+    "password": "admin"
+  },
+  "replica": {
+    "bulk": 500,
+    "timer": 5000,
+    "elasticQueue": "/queue/oamDavid"
+  },
+  "elasticSearch": {
+    "url": "uxdaprhbilling04:9200",
+    "user": "elastic",
+    "password": "elastic",
+    "apiVersion": 7
+  },
+  "logging": {
+    "configFile": "ToDo: point to a .js file with transport info",
+    "console": {
+      "level": "info",
+      "format": "plain"
+    },
+    "file": {
+      "fileName": "c://Develop//newMidNodeHiAffinity//logs//restlog.log",
+      "level": "info",
+      "maxSize": 117760,
+      "maxFiles": 3
+    }
+  }
+}
